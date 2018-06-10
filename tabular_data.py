@@ -1,4 +1,5 @@
 import copy
+import json
 
 class TabularData():
 
@@ -48,19 +49,52 @@ class TabularData():
     def __str__(self):
         return str(self._rows)
 
+    def to_dict(self):
+        return {'columns': self.column_names, 'rows': self._rows}
+
+    @staticmethod
+    def from_dict(data):
+        table = TabularData(data['columns'])
+        for row in data['rows']:
+            table.append(row)
+        return table
+
+    def to_json(self):
+        return json.dumps(self.to_dict())
+
+    @staticmethod
+    def from_json(json_data):
+        return TabularData.from_dict((json.loads(json_data)))
+
+    def to_json_file(self, output_file):
+
+        return json.dump(self.to_dict(), output_file)
+
+    @staticmethod
+    def from_json_file(json_file):
+
+        return TabularData.from_dict((json.load(json_file)))
+
+
 table = TabularData(['Name', 'Surname', 'Age', 'Sex'])
 table.append(['John', "Doe", 30, 'male'])
 table.append(['Anna', 'Novak', 32, 'female'])
 table.append(['Jack', 'Sparrow', 39, 'male'])
-print(table._rows)
 
-print(table.get_row(2))
-print(table.get_column('Name'))
+json_table = table.to_json()
+table2 = TabularData.from_json(json_table)
 
-print(table.rows_count())
+print(table2.column_names == table.column_names)
+print(table2._rows == table._rows)
 
-table.append(['Jane', 'Sorrrow', 29, 'female'])
-print(table.to_list())
+print(table.to_json())
+print(table2)
 
-print(len(table))
-print(str(table))
+with open('table.json', 'wt') as json_file:
+    table.to_json_file(json_file)
+
+with open('table.json', 'rt') as json_file:
+    table4 = TabularData.from_json_file(json_file)
+
+print(table4.column_names == table.column_names)
+print(table4._rows == table._rows)
